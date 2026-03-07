@@ -127,46 +127,88 @@ function getYearGanZhi(year, month, day) {
 
 // 获取月柱（根据节气）
 function getMonthGanZhi(year, month, day) {
-    // 节气对应的月份地支
-    const monthZhiMap = [
-        '丑', // 12月（小寒-立春前）
-        '寅', // 1月（立春-惊蛰前）
-        '卯', // 2月（惊蛰-清明前）
-        '辰', // 3月（清明-立夏前）
-        '巳', // 4月（立夏-芒种前）
-        '午', // 5月（芒种-小暑前）
-        '未', // 6月（小暑-立秋前）
-        '申', // 7月（立秋-白露前）
-        '酉', // 8月（白露-寒露前）
-        '戌', // 9月（寒露-立冬前）
-        '亥', // 10月（立冬-大雪前）
-        '子'  // 11月（大雪-小寒前）
+    // 节气月份的地支（从寅月开始,寅月=正月）
+    // 立春开始进入寅月，惊蛰进入卯月，以此类推
+    const jieqiMonths = [
+        { jieqi: '立春', zhi: '寅', approxDay: 4, publicMonth: 2 },   // 正月
+        { jieqi: '惊蛰', zhi: '卯', approxDay: 6, publicMonth: 3 },   // 二月
+        { jieqi: '清明', zhi: '辰', approxDay: 5, publicMonth: 4 },   // 三月
+        { jieqi: '立夏', zhi: '巳', approxDay: 6, publicMonth: 5 },   // 四月
+        { jieqi: '芒种', zhi: '午', approxDay: 6, publicMonth: 6 },   // 五月
+        { jieqi: '小暑', zhi: '未', approxDay: 7, publicMonth: 7 },   // 六月
+        { jieqi: '立秋', zhi: '申', approxDay: 8, publicMonth: 8 },   // 七月
+        { jieqi: '白露', zhi: '酉', approxDay: 8, publicMonth: 9 },   // 八月
+        { jieqi: '寒露', zhi: '戌', approxDay: 8, publicMonth: 10 },  // 九月
+        { jieqi: '立冬', zhi: '亥', approxDay: 7, publicMonth: 11 },  // 十月
+        { jieqi: '大雪', zhi: '子', approxDay: 7, publicMonth: 12 },  // 十一月
+        { jieqi: '小寒', zhi: '丑', approxDay: 6, publicMonth: 1 }    // 十二月
     ];
     
-    // 判断是否已过本月节气
-    const jieqiDay = getMonthJieqi(year, month);
-    let monthIndex = month - 1;
+    // 找到当前是哪个节气月
+    let monthZhiIndex = 0;
+    let monthZhi = '寅';
     
-    // 如果还没到节气，算上个月
-    if (day < jieqiDay) {
-        monthIndex = (monthIndex - 1 + 12) % 12;
+    // 简化判断：根据公历月份和日期判断节气月
+    if (month === 1) {
+        // 1月：看是否过小寒(6日左右)
+        monthZhi = (day >= 6) ? '丑' : '子';
+    } else if (month === 2) {
+        // 2月：看是否过立春(4日左右)
+        monthZhi = (day >= 4) ? '寅' : '丑';
+    } else if (month === 3) {
+        // 3月：看是否过惊蛰(6日左右)
+        monthZhi = (day >= 6) ? '卯' : '寅';
+    } else if (month === 4) {
+        // 4月：看是否过清明(5日左右)
+        monthZhi = (day >= 5) ? '辰' : '卯';
+    } else if (month === 5) {
+        // 5月：看是否过立夏(6日左右)
+        monthZhi = (day >= 6) ? '巳' : '辰';
+    } else if (month === 6) {
+        // 6月：看是否过芒种(6日左右)
+        monthZhi = (day >= 6) ? '午' : '巳';
+    } else if (month === 7) {
+        // 7月：看是否过小暑(7日左右)
+        monthZhi = (day >= 7) ? '未' : '午';
+    } else if (month === 8) {
+        // 8月：看是否过立秋(8日左右)
+        monthZhi = (day >= 8) ? '申' : '未';
+    } else if (month === 9) {
+        // 9月：看是否过白露(8日左右)
+        monthZhi = (day >= 8) ? '酉' : '申';
+    } else if (month === 10) {
+        // 10月：看是否过寒露(8日左右)
+        monthZhi = (day >= 8) ? '戌' : '酉';
+    } else if (month === 11) {
+        // 11月：看是否过立冬(7日左右)
+        monthZhi = (day >= 7) ? '亥' : '戌';
+    } else if (month === 12) {
+        // 12月：看是否过大雪(7日左右)
+        monthZhi = (day >= 7) ? '子' : '亥';
     }
     
-    const monthZhi = monthZhiMap[monthIndex];
-    const monthZhiIndex = DIZHI.indexOf(monthZhi);
+    monthZhiIndex = DIZHI.indexOf(monthZhi);
     
     // 根据年干推算月干（五虎遁月诀）
+    // 寅月是起点，寅在地支中索引为2
     const yearGan = getYearGanZhi(year, month, day).ganIndex;
     const MONTH_GAN_BASE = {
-        0: 2, 4: 2,  // 甲己年从丙开始
-        1: 4, 5: 4,  // 乙庚年从戊开始
-        2: 6, 6: 6,  // 丙辛年从庚开始
-        3: 8, 7: 8,  // 丁壬年从壬开始
-        8: 0, 9: 0   // 戊癸年从甲开始
+        0: 2,  // 甲年 → 丙寅
+        1: 4,  // 乙年 → 戊寅
+        2: 6,  // 丙年 → 庚寅
+        3: 8,  // 丁年 → 壬寅
+        4: 0,  // 戊年 → 甲寅
+        5: 2,  // 己年 → 丙寅
+        6: 4,  // 庚年 → 戊寅
+        7: 6,  // 辛年 → 庚寅
+        8: 8,  // 壬年 → 壬寅
+        9: 0   // 癸年 → 甲寅
     };
     
     const monthGanBase = MONTH_GAN_BASE[yearGan];
-    const monthGanIndex = (monthGanBase + monthIndex) % 10;
+    // 寅月(索引2)是0，卯月(索引3)是1，以此类推
+    const offsetFromYin = (monthZhiIndex - 2 + 12) % 12;
+    const monthGanIndex = (monthGanBase + offsetFromYin) % 10;
     
     return {
         gan: TIANGAN[monthGanIndex],
@@ -219,11 +261,16 @@ function getDayGanZhi(year, month, day) {
 // 计算时干支
 function getHourGanZhi(dayGanIndex, hourIndex) {
     const HOUR_GAN_BASE = {
-        0: 0, 4: 0,  // 甲己日从甲开始
-        1: 2, 5: 2,  // 乙庚日从丙开始
-        2: 4, 6: 4,  // 丙辛日从戊开始
-        3: 6, 7: 6,  // 丁壬日从庚开始
-        8: 8, 9: 8   // 戊癸日从壬开始
+        0: 0,  // 甲日 → 甲子
+        1: 2,  // 乙日 → 丙子
+        2: 4,  // 丙日 → 戊子
+        3: 6,  // 丁日 → 庚子
+        4: 8,  // 戊日 → 壬子
+        5: 0,  // 己日 → 甲子
+        6: 2,  // 庚日 → 丙子
+        7: 4,  // 辛日 → 戊子
+        8: 6,  // 壬日 → 庚子
+        9: 8   // 癸日 → 壬子
     };
     
     const hourZhi = DIZHI[hourIndex];
