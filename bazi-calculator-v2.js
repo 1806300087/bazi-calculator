@@ -176,28 +176,34 @@ function getMonthGanZhi(year, month, day) {
     };
 }
 
-// 计算日干支（使用基姆拉尔森公式）
+// 计算日干支（修正版 - 从1900年1月1日计算）
 function getDayGanZhi(year, month, day) {
-    let y = year;
-    let m = month;
+    // 1900年1月1日是甲戌日（干支序号10）
+    // 计算从1900年1月1日到目标日期的天数
     
-    // 将1、2月看作上一年的13、14月
-    if (m <= 2) {
-        m += 12;
-        y -= 1;
+    function isLeapYear(y) {
+        return (y % 4 === 0 && y % 100 !== 0) || (y % 400 === 0);
     }
     
-    // 计算与基准日的天数差
-    const c = Math.floor(y / 100);
-    const yy = y % 100;
+    let totalDays = 0;
     
-    // 蔡勒公式变形
-    const totalDays = Math.floor(c / 4) - 2 * c + yy + Math.floor(yy / 4) + 
-                      Math.floor(13 * (m + 1) / 5) + day - 1;
+    // 计算年份天数
+    for (let y = 1900; y < year; y++) {
+        totalDays += isLeapYear(y) ? 366 : 365;
+    }
     
-    // 计算干支
-    let ganZhiIndex = totalDays % 60;
-    if (ganZhiIndex < 0) ganZhiIndex += 60;
+    // 计算月份天数
+    const monthDays = [31, isLeapYear(year) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+    for (let m = 0; m < month - 1; m++) {
+        totalDays += monthDays[m];
+    }
+    
+    // 加上日期
+    totalDays += day - 1;  // -1因为1月1日是第0天
+    
+    // 1900年1月1日是庚戌日，甲戌在60甲子中是第10个(从0开始)
+    const base = 10;  // 甲戌
+    const ganZhiIndex = (base + totalDays) % 60;
     
     const ganIndex = ganZhiIndex % 10;
     const zhiIndex = ganZhiIndex % 12;
