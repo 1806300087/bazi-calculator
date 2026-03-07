@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>八字排盘 - 藏干计算器</title>
+    <title>八字排盘 - 藏干计算器 V2.0</title>
     <style>
         * {
             margin: 0;
@@ -219,8 +219,8 @@
 </head>
 <body>
     <div class="container">
-        <h1>八字排盘 - 藏干计算器</h1>
-        <p class="subtitle">基于《渊海子平》《三命通会》等传统命理学典籍</p>
+        <h1>八字排盘 - 藏干计算器 <span style="font-size: 16px; color: #ff6b6b;">V2.0</span></h1>
+        <p class="subtitle">基于《渊海子平》《三命通会》等传统命理学典籍 | 精确节气算法</p>
         
         <div class="input-group">
             <label for="birthdate">出生日期</label>
@@ -270,14 +270,21 @@
             <div id="explanation" class="info-text"></div>
             
             <div class="reference">
+                <strong>📚 V2.0 更新说明：</strong><br>
+                • ✅ 年柱计算：已加入立春节气判断，1-2月出生日期更准确<br>
+                • ✅ 月柱计算：根据24节气精确划分月份<br>
+                • ✅ 藏干数据：子宫更正为"壬癸"（依据《渊海子平》完整版）<br>
+                • ✅ 日柱、时柱：使用标准天文算法，保持准确<br>
+                <br>
                 <strong>📚 数据来源：</strong>本计算器严格遵循传统命理学典籍：<br>
                 • 藏干规则依据《渊海子平》《三命通会》等古籍<br>
                 • 干支历法计算遵循天文历法规则<br>
+                • 节气计算使用经验公式（误差±1天）<br>
                 • 不包含任何主观解读或捏造内容
             </div>
         </div>
     </div>
     
-    <script src="bazi-calculator.js"></script>
+    <script src="bazi-calculator-v2.js"></script>
 </body>
 </html>
