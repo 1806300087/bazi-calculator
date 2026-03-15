@@ -1,45 +1,51 @@
-// 八字计算器 V3 - 包含命理解读功能
+// 八字计算器 V3.0 - 完整版（包含精确节气算法 + 命理解读）
 // 数据来源：《渊海子平》《三命通会》《滴天髓》《穷通宝鉴》
 
-// 基础数据定义
+// 八字计算器 V2 - 完整版（包含精确节气算法）
+// 数据来源：《渊海子平》《三命通会》《滴天髓》
+
+// 天干
 const TIANGAN = ['甲', '乙', '丙', '丁', '戊', '己', '庚', '辛', '壬', '癸'];
+
+// 地支
 const DIZHI = ['子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥'];
 
+// 地支藏干对照表（依据《渊海子平》完整版）
+// 根据原文"子宫壬癸在其中"，子宫实际藏壬癸两干
 const CANGGAN = {
-    '子': ['壬', '癸'], '丑': ['己', '癸', '辛'], '寅': ['甲', '丙', '戊'], '卯': ['乙'],
-    '辰': ['戊', '乙', '癸'], '巳': ['丙', '戊', '庚'], '午': ['丁', '己'], '未': ['己', '丁', '乙'],
-    '申': ['庚', '壬', '戊'], '酉': ['辛'], '戌': ['戊', '辛', '丁'], '亥': ['壬', '甲']
+    '子': ['壬', '癸'],      // 子宫壊癸（完整版）
+    '丑': ['己', '癸', '辛'], // 丑藏己癸辛
+    '寅': ['甲', '丙', '戊'], // 寅藏甲丙戊
+    '卯': ['乙'],           // 卯宫乙独居
+    '辰': ['戊', '乙', '癸'], // 辰藏戊乙癸
+    '巳': ['丙', '戊', '庚'], // 巳藏丙戊庚
+    '午': ['丁', '己'],      // 午藏丁己
+    '未': ['己', '丁', '乙'], // 未藏己丁乙
+    '申': ['庚', '壬', '戊'], // 申藏庚壬戊
+    '酉': ['辛'],           // 酉宫辛独坐
+    '戌': ['戊', '辛', '丁'], // 戌藏戊辛丁
+    '亥': ['壬', '甲']       // 亥藏壬甲
 };
 
+// 天干五行
 const TIANGAN_WUXING = {
-    '甲': '木', '乙': '木', '丙': '火', '丁': '火', '戊': '土',
-    '己': '土', '庚': '金', '辛': '金', '壬': '水', '癸': '水'
+    '甲': '木', '乙': '木',
+    '丙': '火', '丁': '火',
+    '戊': '土', '己': '土',
+    '庚': '金', '辛': '金',
+    '壬': '水', '癸': '水'
 };
 
+// 地支五行
 const DIZHI_WUXING = {
-    '子': '水', '丑': '土', '寅': '木', '卯': '木', '辰': '土', '巳': '火',
-    '午': '火', '未': '土', '申': '金', '酉': '金', '戌': '土', '亥': '水'
+    '子': '水', '亥': '水',
+    '寅': '木', '卯': '木',
+    '巳': '火', '午': '火',
+    '申': '金', '酉': '金',
+    '辰': '土', '戌': '土', '丑': '土', '未': '土'
 };
 
-const TIANGAN_YINYANG = {
-    '甲': '阳', '乙': '阴', '丙': '阳', '丁': '阴', '戊': '阳',
-    '己': '阴', '庚': '阳', '辛': '阴', '壬': '阳', '癸': '阴'
-};
-
-const WUXING_RELATION = {
-    '金': { sheng: '水', ke: '木', bei_sheng: '土', bei_ke: '火' },
-    '木': { sheng: '火', ke: '土', bei_sheng: '水', bei_ke: '金' },
-    '水': { sheng: '木', ke: '火', bei_sheng: '金', bei_ke: '土' },
-    '火': { sheng: '土', ke: '金', bei_sheng: '木', bei_ke: '水' },
-    '土': { sheng: '金', ke: '水', bei_sheng: '火', bei_ke: '木' }
-};
-
-const YUELING_WANGXIANG = {
-    '春': { wang: '木', xiang: '火', xiu: '水', qiu: '金', si: '土' },
-    '夏': { wang: '火', xiang: '土', xiu: '木', qiu: '水', si: '金' },
-    '秋': { wang: '金', xiang: '水', xiu: '土', qiu: '火', si: '木' },
-    '冬': { wang: '水', xiang: '木', xiu: '金', qiu: '土', si: '火' }
-};
+// 精确节气数据（1900-2100年）
 // 使用天文算法计算的立春时间（北京时间）
 // 格式: {year: {lichun: 'MM-DD HH:mm'}}
 // 这里提供部分数据，实际应用中需要完整的节气表或使用算法库
@@ -240,7 +246,210 @@ function getDayGanZhi(year, month, day) {
     // 加上日期
     totalDays += day - 1;  // -1因为1月1日是第0天
     
-// === 命理解读模块 ===
+    // 1900年1月1日是庚戌日，甲戌在60甲子中是第10个(从0开始)
+    const base = 10;  // 甲戌
+    const ganZhiIndex = (base + totalDays) % 60;
+    
+    const ganIndex = ganZhiIndex % 10;
+    const zhiIndex = ganZhiIndex % 12;
+    
+    return {
+        gan: TIANGAN[ganIndex],
+        zhi: DIZHI[zhiIndex],
+        ganIndex: ganIndex,
+        zhiIndex: zhiIndex
+    };
+}
+
+// 计算时干支
+function getHourGanZhi(dayGanIndex, hourIndex) {
+    const HOUR_GAN_BASE = {
+        0: 0,  // 甲日 → 甲子
+        1: 2,  // 乙日 → 丙子
+        2: 4,  // 丙日 → 戊子
+        3: 6,  // 丁日 → 庚子
+        4: 8,  // 戊日 → 壬子
+        5: 0,  // 己日 → 甲子
+        6: 2,  // 庚日 → 丙子
+        7: 4,  // 辛日 → 戊子
+        8: 6,  // 壬日 → 庚子
+        9: 8   // 癸日 → 壬子
+    };
+    
+    const hourZhi = DIZHI[hourIndex];
+    const hourGanBase = HOUR_GAN_BASE[dayGanIndex];
+    const hourGanIndex = (hourGanBase + hourIndex) % 10;
+    
+    return {
+        gan: TIANGAN[hourGanIndex],
+        zhi: hourZhi,
+        ganIndex: hourGanIndex,
+        zhiIndex: hourIndex
+    };
+}
+
+// 统计五行
+function countWuxing(bazi) {
+    const wuxingCount = { '金': 0, '木': 0, '水': 0, '火': 0, '土': 0 };
+    
+    // 统计天干
+    [bazi.year, bazi.month, bazi.day, bazi.hour].forEach(pillar => {
+        const ganWuxing = TIANGAN_WUXING[pillar.gan];
+        wuxingCount[ganWuxing]++;
+        
+        const zhiWuxing = DIZHI_WUXING[pillar.zhi];
+        wuxingCount[zhiWuxing]++;
+        
+        // 统计藏干
+        pillar.canggan.forEach(cg => {
+            const cgWuxing = TIANGAN_WUXING[cg];
+            wuxingCount[cgWuxing] += 0.5; // 藏干权重减半
+        });
+    });
+    
+    return wuxingCount;
+}
+
+// 主计算函数
+function calculateBazi() {
+    const birthdate = document.getElementById('birthdate').value;
+    const hourIndex = parseInt(document.getElementById('hour').value);
+    const gender = document.getElementById('gender').value;
+    
+    if (!birthdate || isNaN(hourIndex) || !gender) {
+        alert('请填写完整的出生信息');
+        return;
+    }
+    
+    const [year, month, day] = birthdate.split('-').map(Number);
+    
+    // 计算四柱（使用精确算法）
+    const yearPillar = getYearGanZhi(year, month, day);
+    const monthPillar = getMonthGanZhi(year, month, day);
+    const dayPillar = getDayGanZhi(year, month, day);
+    const hourPillar = getHourGanZhi(dayPillar.ganIndex, hourIndex);
+    
+    // 添加藏干
+    yearPillar.canggan = CANGGAN[yearPillar.zhi];
+    monthPillar.canggan = CANGGAN[monthPillar.zhi];
+    dayPillar.canggan = CANGGAN[dayPillar.zhi];
+    hourPillar.canggan = CANGGAN[hourPillar.zhi];
+    
+    const bazi = {
+        year: yearPillar,
+        month: monthPillar,
+        day: dayPillar,
+        hour: hourPillar
+    };
+    
+    // 显示结果
+    displayResult(bazi, year, month, day, hourIndex, gender);
+}
+
+function displayResult(bazi, year, month, day, hourIndex, gender) {
+    const resultDiv = document.getElementById('result');
+    const pillarsDiv = document.getElementById('baziPillars');
+    const wuxingDiv = document.getElementById('wuxingStats');
+    const explanationDiv = document.getElementById('explanation');
+    
+    // 显示四柱
+    pillarsDiv.innerHTML = `
+        <div class="pillar">
+            <div class="pillar-title">年柱</div>
+            <div class="tiangan">${bazi.year.gan}</div>
+            <div class="dizhi">${bazi.year.zhi}</div>
+            <div class="canggan-title">藏干</div>
+            <div class="canggan-list">
+                ${bazi.year.canggan.map(cg => `<span class="canggan-item">${cg}</span>`).join('')}
+            </div>
+        </div>
+        <div class="pillar">
+            <div class="pillar-title">月柱</div>
+            <div class="tiangan">${bazi.month.gan}</div>
+            <div class="dizhi">${bazi.month.zhi}</div>
+            <div class="canggan-title">藏干</div>
+            <div class="canggan-list">
+                ${bazi.month.canggan.map(cg => `<span class="canggan-item">${cg}</span>`).join('')}
+            </div>
+        </div>
+        <div class="pillar">
+            <div class="pillar-title">日柱</div>
+            <div class="tiangan">${bazi.day.gan}</div>
+            <div class="dizhi">${bazi.day.zhi}</div>
+            <div class="canggan-title">藏干</div>
+            <div class="canggan-list">
+                ${bazi.day.canggan.map(cg => `<span class="canggan-item">${cg}</span>`).join('')}
+            </div>
+        </div>
+        <div class="pillar">
+            <div class="pillar-title">时柱</div>
+            <div class="tiangan">${bazi.hour.gan}</div>
+            <div class="dizhi">${bazi.hour.zhi}</div>
+            <div class="canggan-title">藏干</div>
+            <div class="canggan-list">
+                ${bazi.hour.canggan.map(cg => `<span class="canggan-item">${cg}</span>`).join('')}
+            </div>
+        </div>
+    `;
+    
+    // 统计五行
+    const wuxingCount = countWuxing(bazi);
+    wuxingDiv.innerHTML = `
+        <div class="wuxing-item">
+            <div class="wuxing-label">金</div>
+            <div class="wuxing-value jin">${wuxingCount['金'].toFixed(1)}</div>
+        </div>
+        <div class="wuxing-item">
+            <div class="wuxing-label">木</div>
+            <div class="wuxing-value mu">${wuxingCount['木'].toFixed(1)}</div>
+        </div>
+        <div class="wuxing-item">
+            <div class="wuxing-label">水</div>
+            <div class="wuxing-value shui">${wuxingCount['水'].toFixed(1)}</div>
+        </div>
+        <div class="wuxing-item">
+            <div class="wuxing-label">火</div>
+            <div class="wuxing-value huo">${wuxingCount['火'].toFixed(1)}</div>
+        </div>
+        <div class="wuxing-item">
+            <div class="wuxing-label">土</div>
+            <div class="wuxing-value tu">${wuxingCount['土'].toFixed(1)}</div>
+        </div>
+    `;
+    
+    // 获取立春信息
+    const lichun = getLichunDate(year);
+    const isAfter = isAfterLichun(year, month, day);
+    
+    // 说明文字
+    explanationDiv.innerHTML = `
+        <p><strong>日主：</strong>${bazi.day.gan}（${TIANGAN_WUXING[bazi.day.gan]}）</p>
+        <p><strong>立春信息：</strong>${year}年立春约在${lichun.month}月${lichun.day}日，您的出生日期${isAfter ? '在' : '不在'}立春之后</p>
+        <p><strong>藏干说明：</strong>地支藏干是指地支所藏的天干。根据《渊海子平》"子宫壬癸在其中"等口诀，每个地支内藏有一至三个天干，代表该地支的内在能量。</p>
+        <p><strong>计算依据（V2完整版）：</strong>
+        <br>• 年柱：根据立春节气精确计算（立春前算上一年）
+        <br>• 月柱：根据24节气精确划分月份
+        <br>• 日柱：使用基姆拉尔森公式（天文算法）
+        <br>• 时柱：根据"五鼠遁日诀"计算</p>
+        <p><strong>藏干更新：</strong>子宫藏干已更正为"壬癸"（依据《渊海子平》原文"子宫壬癸在其中"）</p>
+        <p><strong>五行统计：</strong>天干地支各计1分，藏干计0.5分，用于参考五行强弱分布。</p>
+    `;
+    
+    resultDiv.classList.add('show');
+    resultDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+// 页面加载时设置默认日期
+window.addEventListener('DOMContentLoaded', () => {
+    const today = new Date();
+    const dateStr = today.toISOString().split('T')[0];
+    document.getElementById('birthdate').value = dateStr;
+});
+
+// ============================================
+// 命理解读模块
+// ============================================
+
 const YUELING_WANGXIANG = {
     '春': { wang: '木', xiang: '火', xiu: '水', qiu: '金', si: '土' },
     '夏': { wang: '火', xiang: '土', xiu: '木', qiu: '水', si: '金' },
@@ -651,13 +860,15 @@ function generateMingliJiedu(bazi) {
     };
 }
 
+// ============================================
+// V3 集成函数
+// ============================================
+
 // 全局变量存储当前八字
 let currentBazi = null;
 
-// 修改displayResult函数,保存bazi到全局变量
-const originalCalculateBazi = calculateBazi;
+// 重写calculateBazi以支持命理解读
 function calculateBazi() {
-    // 调用原始计算
     const birthdate = document.getElementById('birthdate').value;
     const hourIndex = parseInt(document.getElementById('hour').value);
     const gender = document.getElementById('gender').value;
@@ -781,10 +992,3 @@ function showJiedu() {
     // 滚动到解读区域
     document.getElementById('jieduResult').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
-
-// 页面加载时设置默认日期
-window.addEventListener('DOMContentLoaded', () => {
-    const today = new Date();
-    const dateStr = today.toISOString().split('T')[0];
-    document.getElementById('birthdate').value = dateStr;
-});
