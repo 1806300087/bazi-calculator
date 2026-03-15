@@ -741,3 +741,22 @@ function showJiedu() {
     document.getElementById('jieduResult').style.display = 'block';
     document.getElementById('jieduResult').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
+
+// 版本标识和调试
+console.log('=== 八字计算器 V3.0-REBUILD 加载完成 ===');
+console.log('calculateBazi 类型:', typeof calculateBazi);
+console.log('showJiedu 类型:', typeof showJiedu);
+console.log('currentBazi 初始值:', currentBazi);
+
+// 测试函数可访问性
+window._baziDebug = {
+    version: 'V3.0-REBUILD-' + new Date().toISOString(),
+    calculateBazi: calculateBazi,
+    showJiedu: showJiedu,
+    test: function() {
+        console.log('测试函数可以访问');
+        console.log('currentBazi:', currentBazi);
+        return 'OK';
+    }
+};
+console.log('调试接口: window._baziDebug');
