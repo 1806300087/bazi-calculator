@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>八字排盘 - 藏干计算器 V2.0</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 40px;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 32px;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        
+        .input-group {
+            margin-bottom: 25px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: bold;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .datetime-inputs {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .result {
+            margin-top: 30px;
+            padding: 30px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            display: none;
+        }
+        
+        .result.show {
+            display: block;
+        }
+        
+        .bazi-pillars {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .pillar {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .pillar-title {
+            font-size: 12px;
+            color: #888;
+            margin-bottom: 10px;
+        }
+        
+        .tiangan {
+            font-size: 24px;
+            font-weight: bold;
+            color: #d63447;
+            margin-bottom: 5px;
+        }
+        
+        .dizhi {
+            font-size: 24px;
+            font-weight: bold;
+            color: #1e3799;
+            margin-bottom: 15px;
+        }
+        
+        .canggan-title {
+            font-size: 11px;
+            color: #666;
+            margin-top: 10px;
+            margin-bottom: 5px;
+            border-top: 1px solid #eee;
+            padding-top: 8px;
+        }
+        
+        .canggan-list {
+            font-size: 13px;
+            color: #555;
+        }
+        
+        .canggan-item {
+            display: inline-block;
+            padding: 3px 8px;
+            background: #f0f0f0;
+            border-radius: 4px;
+            margin: 2px;
+        }
+        
+        .section-title {
+            font-size: 18px;
+            color: #333;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+        }
+        
+        .info-text {
+            color: #666;
+            line-height: 1.8;
+            margin-bottom: 10px;
+        }
+        
+        .reference {
+            margin-top: 30px;
+            padding: 15px;
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            border-radius: 4px;
+            font-size: 13px;
+            color: #856404;
+        }
+        
+        .wuxing-row {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+        }
+        
+        .wuxing-item {
+            text-align: center;
+        }
+        
+        .wuxing-label {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        
+        .wuxing-value {
+            font-size: 20px;
+            font-weight: bold;
+        }
+        
+        .jin { color: #FFD700; }
+        .mu { color: #228B22; }
+        .shui { color: #1E90FF; }
+        .huo { color: #FF4500; }
+        .tu { color: #8B4513; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>八字排盘 - 藏干计算器 <span style="font-size: 16px; color: #ff6b6b;">V2.0</span></h1>
+        <p class="subtitle">基于《渊海子平》《三命通会》等传统命理学典籍 | 精确节气算法</p>
+        
+        <div class="input-group">
+            <label for="birthdate">出生日期</label>
+            <input type="date" id="birthdate" required>
+        </div>
+        
+        <div class="datetime-inputs">
+            <div class="input-group">
+                <label for="hour">时辰</label>
+                <select id="hour" required>
+                    <option value="">请选择时辰</option>
+                    <option value="0">子时 (23:00-00:59)</option>
+                    <option value="1">丑时 (01:00-02:59)</option>
+                    <option value="2">寅时 (03:00-04:59)</option>
+                    <option value="3">卯时 (05:00-06:59)</option>
+                    <option value="4">辰时 (07:00-08:59)</option>
+                    <option value="5">巳时 (09:00-10:59)</option>
+                    <option value="6">午时 (11:00-12:59)</option>
+                    <option value="7">未时 (13:00-14:59)</option>
+                    <option value="8">申时 (15:00-16:59)</option>
+                    <option value="9">酉时 (17:00-18:59)</option>
+                    <option value="10">戌时 (19:00-20:59)</option>
+                    <option value="11">亥时 (21:00-22:59)</option>
+                </select>
+            </div>
+            
+            <div class="input-group">
+                <label for="gender">性别</label>
+                <select id="gender" required>
+                    <option value="">请选择</option>
+                    <option value="male">男</option>
+                    <option value="female">女</option>
+                </select>
+            </div>
+        </div>
+        
+        <button class="btn" onclick="calculateBazi()">排盘计算</button>
+        
+        <div id="result" class="result">
+            <div class="section-title">八字四柱</div>
+            <div id="baziPillars" class="bazi-pillars"></div>
+            
+            <div class="section-title">五行统计</div>
+            <div id="wuxingStats" class="wuxing-row"></div>
+            
+            <div class="section-title">说明</div>
+            <div id="explanation" class="info-text"></div>
+            
+            <div class="reference">
+                <strong>📚 V2.0 更新说明：</strong><br>
+                • ✅ 年柱计算：已加入立春节气判断，1-2月出生日期更准确<br>
+                • ✅ 月柱计算：根据24节气精确划分月份<br>
+                • ✅ 藏干数据：子宫更正为"壬癸"（依据《渊海子平》完整版）<br>
+                • ✅ 日柱、时柱：使用标准天文算法，保持准确<br>
+                <br>
+                <strong>📚 数据来源：</strong>本计算器严格遵循传统命理学典籍：<br>
+                • 藏干规则依据《渊海子平》《三命通会》等古籍<br>
+                • 干支历法计算遵循天文历法规则<br>
+                • 节气计算使用经验公式（误差±1天）<br>
+                • 不包含任何主观解读或捏造内容
+            </div>
+        </div>
+    </div>
+    
+    <script src="bazi-calculator-v2.js"></script>
+</body>
+</html>
