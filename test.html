@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>测试</title>
+</head>
+<body>
+    <h1>八字计算测试</h1>
+    <button onclick="testCalc()">测试计算</button>
+    <button onclick="testJiedu()">测试解读</button>
+    <div id="output"></div>
+    
+    <script src="bazi-calculator-v3.js"></script>
+    <script>
+        let testBazi = null;
+        
+        function testCalc() {
+            try {
+                console.log("开始测试计算...");
+                const year = 1990, month = 2, day = 10;
+                
+                const yearP = getYearGanZhi(year, month, day);
+                const monthP = getMonthGanZhi(year, month, day);
+                const dayP = getDayGanZhi(year, month, day);
+                const hourP = getHourGanZhi(dayP.ganIndex, 0);
+                
+                yearP.canggan = CANGGAN[yearP.zhi];
+                monthP.canggan = CANGGAN[monthP.zhi];
+                dayP.canggan = CANGGAN[dayP.zhi];
+                hourP.canggan = CANGGAN[hourP.zhi];
+                
+                testBazi = { year: yearP, month: monthP, day: dayP, hour: hourP };
+                
+                document.getElementById('output').innerHTML = 
+                    `<p>八字: ${yearP.gan}${yearP.zhi} ${monthP.gan}${monthP.zhi} ${dayP.gan}${dayP.zhi} ${hourP.gan}${hourP.zhi}</p>`;
+                
+                console.log("✅ 计算成功", testBazi);
+            } catch(e) {
+                console.error("❌ 计算失败:", e);
+                document.getElementById('output').innerHTML = `<p style="color:red;">错误: ${e.message}</p>`;
+            }
+        }
+        
+        function testJiedu() {
+            try {
+                console.log("开始测试解读...");
+                if (!testBazi) {
+                    alert('请先测试计算');
+                    return;
+                }
+                
+                const jiedu = generateMingliJiedu(testBazi);
+                console.log("✅ 解读成功", jiedu);
+                
+                document.getElementById('output').innerHTML += 
+                    `<p>日主强弱: ${jiedu.strength.strength}</p>
+                     <p>格局: ${jiedu.geju.geju}</p>`;
+                     
+            } catch(e) {
+                console.error("❌ 解读失败:", e);
+                document.getElementById('output').innerHTML += `<p style="color:red;">解读错误: ${e.message}<br>${e.stack}</p>`;
+            }
+        }
+    </script>
+</body>
+</html>

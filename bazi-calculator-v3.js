@@ -311,38 +311,6 @@ function countWuxing(bazi) {
 }
 
 // 主计算函数
-function calculateBazi() {
-    const birthdate = document.getElementById('birthdate').value;
-    const hourIndex = parseInt(document.getElementById('hour').value);
-    const gender = document.getElementById('gender').value;
-    
-    if (!birthdate || isNaN(hourIndex) || !gender) {
-        alert('请填写完整的出生信息');
-        return;
-    }
-    
-    const [year, month, day] = birthdate.split('-').map(Number);
-    
-    // 计算四柱（使用精确算法）
-    const yearPillar = getYearGanZhi(year, month, day);
-    const monthPillar = getMonthGanZhi(year, month, day);
-    const dayPillar = getDayGanZhi(year, month, day);
-    const hourPillar = getHourGanZhi(dayPillar.ganIndex, hourIndex);
-    
-    // 添加藏干
-    yearPillar.canggan = CANGGAN[yearPillar.zhi];
-    monthPillar.canggan = CANGGAN[monthPillar.zhi];
-    dayPillar.canggan = CANGGAN[dayPillar.zhi];
-    hourPillar.canggan = CANGGAN[hourPillar.zhi];
-    
-    const bazi = {
-        year: yearPillar,
-        month: monthPillar,
-        day: dayPillar,
-        hour: hourPillar
-    };
-    
-    // 显示结果
     displayResult(bazi, year, month, day, hourIndex, gender);
 }
 
